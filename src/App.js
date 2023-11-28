@@ -1,8 +1,7 @@
-// Donc tu vas dans "react", tu vas chercher un élément qui se nomme "component", c'est du JS (pur et dur)
 import React, {Component} from 'react';
 import './App.css';
 import { sampleText } from './sampleText';
-import { Marked } from 'marked';
+import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 
 class App extends Component {
@@ -10,14 +9,35 @@ class App extends Component {
     text : sampleText,
    }; 
 
-   // On récupère l'event, "handlechange est le nom de la fonction"
-   // event.target déclenche l'évènement...
-   // La fonction "handleChange" est appelée chaque fois que l'évènement "onChange" se produit dans le "textarea", cet évènement est déclenché chaque fois que le contenue du champ de texte change.
-   // A l'intérieur de la fonction "handleChange", la const "text" extrait la valeur de "textarea".
-   // "this.setState({ text })", met à jour l'état du composant avec la nouvelle valeur du texte extraite. Cela déclenchera un rendu de votre composant avec la nouvelle valeur du texte.
+   // J'aimerais bien que qd on recharge, mon sampleText se recharge.
+   componentDidMount() {
+    console.log('montage')
+    const text = localStorage.getItem('myText')
+    if(text)
+    {
+      // Ici normalement, on devrait réécrire this.setState({text:text})
+      this.setState({text})
+    }else {
+      // On réécrit le raccourcit...
+      this.setState({text:sampleText})
+    }
+   }
+
+   // Ca se modifie ici, et le localStorage, il se modifie ici, ou qd le component se modifie...
+  //console.log('modification')
+   componentDidUpdate() {
+    const text = this.state.text
+    localStorage.setItem('myText', text)
+   }
+
    handleChange = (event) => {
     const text = event.target.value
     this.setState({text})
+   }
+
+   renderText = text => {
+    let text2 = DOMPurify.sanitize(text, {ALLOWED_TAGS: ['b']})
+    return marked.parse(text2)
    }
 
   render() { 
@@ -37,7 +57,7 @@ class App extends Component {
           </div>
           <div className='col-sm-6'>
 
-            <div></div>
+            <div dangerouslySetInnerHTML={{__html:this.renderText(this.state.text)}}></div>
 
           </div>
         </div>
